@@ -35,14 +35,29 @@ class Link extends Model
         return $url;
     }
 
-    public static function incrementViewCount($code)
+    public static function incrementViewCount($link = null, $code = null)
     {
-        $url = self::getUrl($code);
-        $url->increment('views_count');
+        if(!$link)
+            $link = self::getUrl($code);
 
-        $cacheKey = "url:$code";
-        Cache::put($cacheKey, $url);
+        $link->increment('views_count');
 
-        return $url;
+        $cacheKey = "url:{$link->code}";
+        Cache::put($cacheKey, $link);
+
+        return $link;
+    }
+    public static function updateCount($code, $count)
+    {
+
+        $cacheKey = "url:{$code}";
+
+        if (Cache::has($cacheKey)) {
+            $link = Cache::get($cacheKey);
+
+            $link->views_count = $count;
+
+            Cache::put($cacheKey, $link);
+        }
     }
 }
